@@ -10,7 +10,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_mysql
 
+# Enable Apache rewrite
 RUN a2enmod rewrite
+
+# Change Apache DocumentRoot to /public
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
+ && sed -i 's|/var/www/|/var/www/html/public|g' /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
 
@@ -23,3 +28,4 @@ RUN composer install --optimize-autoloader --no-dev
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
+
