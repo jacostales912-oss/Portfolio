@@ -41,3 +41,18 @@ EXPOSE 80
 
 # Start Apache
 CMD ["apache2-foreground"]
+COPY . .
+
+# Make sure we have a .env file
+RUN cp .env.example .env
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN composer install --optimize-autoloader --no-dev
+
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# Generate APP_KEY & cache configs/routes
+RUN php artisan key:generate --no-interaction \
+    && php artisan config:cache \
+    && php artisan route:cache
+
